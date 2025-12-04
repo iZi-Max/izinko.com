@@ -41,7 +41,14 @@ const App = () => {
     const [isCvModalOpen, setIsCvModalOpen] = useState(false);
     const [showCvMarker, setShowCvMarker] = useState(true);
 
-    const handleCvDownload = () => {
+    const handleCvDownload = (type) => {
+        // Google Drive direct download link
+        const humanCvUrl = 'https://drive.google.com/uc?export=download&id=1J3WHRg95ckZmloAWwujEn0OhdzIPgWiA';
+        const robotCvUrl = humanCvUrl; // Update with ATS version when available
+
+        const downloadUrl = type === 'human' ? humanCvUrl : robotCvUrl;
+        window.open(downloadUrl, '_blank');
+
         setShowCvMarker(false);
         setTimeout(() => setIsCvModalOpen(false), 500);
     };
