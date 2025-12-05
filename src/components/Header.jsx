@@ -129,7 +129,7 @@ const Header = ({ age, progressPercentage, activeTab, onTabChange, onOpenCvModal
 
 
             {isMobileMenuOpen && (
-                <div className="md:hidden absolute top-[73px] left-0 right-0 z-30 bg-white dark:bg-neutral-900 border-b border-neutral-300 dark:border-neutral-800 shadow-lg">
+                <div className="md:hidden absolute top-[73px] left-0 right-0 z-[60] bg-white dark:bg-neutral-900 border-b border-neutral-300 dark:border-neutral-800 shadow-lg">
                     <nav className="flex flex-col p-4 gap-2">
                         {navItems.map((item) => {
                             const isCv = item.label === 'CV';
