@@ -111,13 +111,17 @@ const Connection = ({ start, end, status, categoryColor }) => {
     );
 };
 
-const SkillNode = ({ node, x, y, totalHeight, onClick, onMouseEnter, onMouseLeave }) => {
+const SkillNode = ({ node, x, y, totalHeight, onClick, isSelected }) => {
     const catConfig = CATEGORIES[node.category];
     const Icon = node.icon;
     const status = node.status;
 
-    let baseClasses = "relative w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer z-10 shadow-lg";
+    let baseClasses = "relative w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer z-10 shadow-lg hover:scale-110 hover:brightness-110";
     let iconClasses = "w-5 h-5 md:w-7 md:h-7 transition-colors duration-300";
+
+    if (isSelected) {
+        baseClasses += ` ring-4 ring-white ring-offset-2 ring-offset-black scale-110`;
+    }
 
     if (status === 'mastered') {
         baseClasses += ` border-2 bg-neutral-900 ${catConfig.border} ${catConfig.shadow}`;
@@ -142,8 +146,6 @@ const SkillNode = ({ node, x, y, totalHeight, onClick, onMouseEnter, onMouseLeav
         >
             <div
                 className={baseClasses}
-                onMouseEnter={() => onMouseEnter(node)}
-                onMouseLeave={onMouseLeave}
                 onClick={(e) => { e.stopPropagation(); onClick(node); }}
             >
                 <Icon className={iconClasses} />
@@ -158,7 +160,7 @@ const SkillNode = ({ node, x, y, totalHeight, onClick, onMouseEnter, onMouseLeav
 };
 
 export default function Skills() {
-    const [hoveredNode, setHoveredNode] = useState(null);
+    const [selectedNode, setSelectedNode] = useState(null);
     const [activeTab, setActiveTab] = useState('PROGRAMMING');
     const [isMobile, setIsMobile] = useState(false);
 
@@ -226,18 +228,18 @@ export default function Skills() {
 
     return (
         <div
-            className="relative w-full h-full bg-white/50 dark:bg-black/50 select-none flex flex-col md:block overflow-hidden"
-            onClick={() => isMobile && setHoveredNode(null)}
+            className="relative w-full h-full bg-white/50 dark:bg-black/50 select-none flex flex-col overflow-y-auto overflow-x-hidden"
+            onClick={() => setSelectedNode(null)}
         >
 
-            <div className="md:hidden w-full flex border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-md z-30 shrink-0">
+            <div className="md:hidden w-full flex border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-md z-30 shrink-0 sticky top-0">
                 {Object.values(CATEGORIES).map((cat) => (
                     <button
                         key={cat.id}
                         onClick={(e) => {
                             e.stopPropagation();
                             setActiveTab(cat.id);
-                            setHoveredNode(null);
+                            setSelectedNode(null);
                         }}
                         className={`
                             flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-all
@@ -249,7 +251,8 @@ export default function Skills() {
                 ))}
             </div>
 
-            <div className="relative flex-grow w-full flex items-center justify-center md:h-full overflow-hidden">
+            {/* Adjusted padding back to normal since card is no longer fixed to bottom */}
+            <div className="relative flex-grow w-full flex items-center justify-center md:items-start md:pt-10 pb-12 min-h-[500px]">
 
                 <div
                     className="relative w-full transition-all duration-500 md:h-auto md:aspect-square md:max-w-4xl"
@@ -279,9 +282,8 @@ export default function Skills() {
                                 x={node.x}
                                 y={node.y}
                                 totalHeight={boxHeight}
-                                onClick={(n) => setHoveredNode(n)}
-                                onMouseEnter={(n) => !isMobile && setHoveredNode(n)}
-                                onMouseLeave={() => !isMobile && setHoveredNode(null)}
+                                isSelected={selectedNode?.id === node.id}
+                                onClick={(n) => setSelectedNode(selectedNode?.id === n.id ? null : n)}
                             />
                         ))}
                     </div>
@@ -289,42 +291,52 @@ export default function Skills() {
 
             </div>
 
+            {/* CENTERED POPUP MODAL */}
+            {/* Using inset-0 to cover screen for centering, z-50 to stay on top */}
             <div className={`
-                fixed bottom-24 left-0 w-full px-4 z-40 pointer-events-none flex justify-center
-                md:absolute md:bottom-0 md:p-6
-                transition-all duration-300 ease-out transform
-                ${hoveredNode ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}
+                fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none
+                transition-all duration-300 ease-out
+                ${selectedNode ? 'opacity-100' : 'opacity-0'}
             `}>
-                <div className="bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 p-6 rounded-2xl shadow-2xl w-full max-w-xl pointer-events-auto relative border-l-4 border-l-neutral-600">
+                {/* Backdrop Overlay for better contrast */}
+                <div className={`absolute inset-0 bg-black/20 transition-opacity ${selectedNode ? 'opacity-100' : 'opacity-0'}`} />
+
+                {/* The Card */}
+                <div className={`
+                    bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 p-6 rounded-2xl shadow-2xl
+                    w-full max-w-lg pointer-events-auto relative border-l-4 border-l-neutral-600
+                    transform transition-all duration-300
+                    ${selectedNode ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}
+                `}>
 
                     <button
-                        onClick={(e) => { e.stopPropagation(); setHoveredNode(null); }}
-                        className="absolute top-3 right-3 p-2 text-neutral-500 hover:text-white md:hidden"
+                        onClick={(e) => { e.stopPropagation(); setSelectedNode(null); }}
+                        className="absolute top-3 right-3 p-2 text-neutral-500 hover:text-white"
                     >
                         <X size={20} />
                     </button>
 
-                    {hoveredNode && (
-                        <div className="flex gap-6 items-center">
+                    {selectedNode && (
+                        <div className="flex gap-4 items-start">
                             <div className={`
                                 w-14 h-14 shrink-0 rounded-xl flex items-center justify-center border shadow-lg transform rotate-3
                                 bg-neutral-800 border-neutral-700
-                                ${CATEGORIES[hoveredNode.category].text}
+                                ${CATEGORIES[selectedNode.category].text}
                             `}>
-                                <hoveredNode.icon size={28} />
+                                <selectedNode.icon size={28} />
                             </div>
 
                             <div className="flex-grow">
                                 <div className="flex justify-between items-center mb-1">
-                                    <h3 className={`text-xl font-bold ${CATEGORIES[hoveredNode.category].text}`}>
-                                        {hoveredNode.label}
+                                    <h3 className={`text-xl font-bold ${CATEGORIES[selectedNode.category].text}`}>
+                                        {selectedNode.label}
                                     </h3>
                                     <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-neutral-400">
-                                        {hoveredNode.status}
+                                        {selectedNode.status}
                                     </span>
                                 </div>
-                                <p className="text-neutral-300 text-xs leading-relaxed">
-                                    {hoveredNode.description}
+                                <p className="text-neutral-300 text-xs leading-relaxed mt-2">
+                                    {selectedNode.description}
                                 </p>
                             </div>
                         </div>

@@ -42,11 +42,15 @@ const App = () => {
     const [showCvMarker, setShowCvMarker] = useState(true);
 
     const handleCvDownload = (type) => {
-        // Google Drive direct download link
-        const humanCvUrl = 'https://drive.google.com/uc?export=download&id=1J3WHRg95ckZmloAWwujEn0OhdzIPgWiA';
-        const robotCvUrl = humanCvUrl; // Update with ATS version when available
+        // UPDATED: New UploadThing Link
+        const humanCvUrl = 'https://j4jbi0zyeo.ufs.sh/f/MDkjO1tUfV4kvhlzntiJdLzyUfo6xDKB7Nhr5mtMubcWg1FI';
+
+        // Using the same link for the "Robot" version for now until you have a specific ATS one
+        const robotCvUrl = humanCvUrl;
 
         const downloadUrl = type === 'human' ? humanCvUrl : robotCvUrl;
+
+        // Opens the PDF in a new tab (Standard behavior for cross-origin files)
         window.open(downloadUrl, '_blank');
 
         setShowCvMarker(false);
